@@ -26,8 +26,7 @@ public class CoinTransaction {
 
     private BigDecimal amount;
 
-    //충전인지, 사용인지 ("CHARGE", "USE") -> enum 고려
-    private String transactionType;
+    private TransactionType transactionType;
 
     private LocalDateTime transactionTime;
 }
