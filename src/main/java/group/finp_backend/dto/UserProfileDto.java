@@ -1,5 +1,7 @@
 package group.finp_backend.dto;
 
+import group.finp_backend.dto.comment.CommentSummaryDto;
+import group.finp_backend.dto.post.PostSummaryDto;
 import lombok.Builder;
 import lombok.Getter;
 

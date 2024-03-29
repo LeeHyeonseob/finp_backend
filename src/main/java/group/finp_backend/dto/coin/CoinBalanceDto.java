@@ -1,4 +1,4 @@
-package group.finp_backend.dto;
+package group.finp_backend.dto.coin;
 
 import lombok.Builder;
 import lombok.Getter;
