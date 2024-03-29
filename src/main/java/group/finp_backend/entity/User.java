@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 
-public class User {
+public class User extends BaseTimeEntity {
 
     @Id
     @GeneratedValue

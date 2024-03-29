@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Comment {
+public class Comment extends BaseTimeEntity{
 
     @Id
     @GeneratedValue

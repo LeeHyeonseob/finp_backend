@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Post {
+public class Post extends BaseTimeEntity{
 
     @Id
     @GeneratedValue
@@ -21,6 +21,8 @@ public class Post {
     private String title;
 
     private String content;
+
+    private Long viewCount = 0L;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
