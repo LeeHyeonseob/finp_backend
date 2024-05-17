@@ -19,6 +19,8 @@ public class Comment extends BaseTimeEntity{
 
     private String content;
 
+    private Long likeCount;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id",nullable = false)
     private Post post;

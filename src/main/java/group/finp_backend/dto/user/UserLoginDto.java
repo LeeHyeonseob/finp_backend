@@ -1,11 +1,11 @@
-package group.finp_backend.dto;
+package group.finp_backend.dto.user;
 
 import lombok.Builder;
 import lombok.Getter;
 
 @Getter
 @Builder
-public class LoginRequestDto {
-    private String email;
+public class UserLoginDto {
+    private String username;
     private String password;
 }

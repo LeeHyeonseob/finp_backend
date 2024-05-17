@@ -1,6 +1,6 @@
 package group.finp_backend.util;
 
-import group.finp_backend.dto.RegisterRequestDto;
+import group.finp_backend.dto.user.UserRegistrationDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
@@ -28,11 +28,11 @@ public class JwtUtil {
         this.accessTokenExpTime = accessTokenExpTime;
     }
 
-    public String createAccessToken(RegisterRequestDto dto){
+    public String createAccessToken(UserRegistrationDto dto){
         return createToken(dto, accessTokenExpTime);
     }
 
-    private String createToken(RegisterRequestDto dto, long expireTime){
+    private String createToken(UserRegistrationDto dto, long expireTime){
         Claims claims = Jwts.claims();
         claims.put("email", dto.getEmail());
         claims.put("password", dto.getPassword());

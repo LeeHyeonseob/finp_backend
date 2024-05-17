@@ -1,13 +1,11 @@
 package group.finp_backend.service;
 
-import group.finp_backend.dto.post.CreatePostDto;
+import group.finp_backend.dto.post.PostCreateDto;
 import group.finp_backend.dto.post.PostDto;
-import group.finp_backend.dto.post.UpdatePostDto;
+import group.finp_backend.dto.post.PostUpdateDto;
 import group.finp_backend.entity.Post;
-import group.finp_backend.entity.Tag;
 import group.finp_backend.entity.User;
 import group.finp_backend.repository.PostRepository;
-import group.finp_backend.repository.TagRepository;
 import group.finp_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -24,10 +22,9 @@ public class PostService {
 
     private final PostRepository postRepository;
     private final UserRepository userRepository;
-    private final TagRepository tagRepository;
 
     @Transactional
-    public PostDto createPost(CreatePostDto createPostDto){
+    public PostDto createPost(PostCreateDto createPostDto){
         User user = userRepository.findById(createPostDto.getUserId())
                 .orElseThrow(() -> new IllegalArgumentException("User"));
 
@@ -37,7 +34,7 @@ public class PostService {
         post.setUser(user);
         post.setViewCount(0L);
 
-        List<Tag> tags = tagRepository.findAllById(createPostDto.getTags());
+
         post.setTags(new ArrayList<>(tags));
 
         post = postRepository.save(post);
@@ -52,7 +49,7 @@ public class PostService {
     }
 
     @Transactional
-    public PostDto updatePost(Long postId, UpdatePostDto updatePostDto){
+    public PostDto updatePost(Long postId, PostUpdateDto updatePostDto){
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + postId));
 

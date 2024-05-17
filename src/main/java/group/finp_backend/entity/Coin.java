@@ -26,5 +26,9 @@ public class Coin {
     //balance 잔고와 같은 민감한 수는 BigDecimal 타입 사용
     private BigDecimal balance;
 
+    private BigDecimal totalEarned;
+
+    private BigDecimal totalSpent;
+
 
 }

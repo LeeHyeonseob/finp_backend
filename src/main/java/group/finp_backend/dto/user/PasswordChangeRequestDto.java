@@ -1,4 +1,4 @@
-package group.finp_backend.dto;
+package group.finp_backend.dto.user;
 
 import lombok.Builder;
 import lombok.Getter;

@@ -1,12 +1,14 @@
 package group.finp_backend.service;
 
-import group.finp_backend.config.PasswordEncoderConfig;
-import group.finp_backend.dto.LoginRequestDto;
-import group.finp_backend.dto.RegisterRequestDto;
+import group.finp_backend.dto.user.UserDto;
+import group.finp_backend.dto.user.UserLoginDto;
+import group.finp_backend.dto.user.UserRegistrationDto;
 import group.finp_backend.entity.User;
 import group.finp_backend.repository.UserRepository;
 import group.finp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -15,16 +17,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class AuthService {
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
     private final JwtUtil jwtUtil;
     private final PasswordEncoder encoder;
 
 
+
+    //register 구현
+    public UserDto register(UserRegistrationDto dto){
+        User newUser = new User()
+    }
     @Transactional
-    public String login(LoginRequestDto dto){
+    public String login(UserLoginDto dto){
         String email = dto.getEmail();
         String password = dto.getPassword();
         User user = userRepository.findUserByEmail(email);
@@ -36,7 +45,7 @@ public class AuthService {
             throw new BadCredentialsException("비밀번호가 일치하지 않습니다");
         }
 
-        RegisterRequestDto regdto = RegisterRequestDto.builder()
+        UserRegistrationDto regdto = UserRegistrationDto.builder()
                 .email(email)
                 .password(password)
                 .username(user.getUsername())

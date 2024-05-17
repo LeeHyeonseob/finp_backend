@@ -8,10 +8,5 @@ import java.util.List;
 import java.util.Optional;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
-    boolean existsByUserIdAndPostId(Long userId, Long postId);
-
-
-    Favorite findByUserIdAndPostId(Long userId, Long postId);
-
     List<Favorite> findByUserId(Long userId);
 }
