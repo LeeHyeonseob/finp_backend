@@ -1,0 +1,14 @@
+package group.finp_backend.dto;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+public class CoinChargeRequestDto {
+    private Long userId;
+    private String impUid;
+    private int amount;
+}

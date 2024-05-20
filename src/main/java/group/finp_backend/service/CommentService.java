@@ -1,6 +1,6 @@
 package group.finp_backend.service;
 
-import group.finp_backend.dto.comment.CommentDto;
+import group.finp_backend.dto.CommentDto;
 import group.finp_backend.entity.Comment;
 import group.finp_backend.entity.Post;
 import group.finp_backend.entity.User;
@@ -16,56 +16,51 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    @Transactional
-    public CommentDto createComment(CommentDto commentDto){
-        Post post = postRepository.findById(commentDto.getPostId())
-                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + commentDto.getPostId()));
-        User user = userRepository.findById(commentDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + commentDto.getUserId()));
+    public List<CommentDto> getCommentsByPostId(Long postId) {
+        return commentRepository.findByPostId(postId)
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
 
+    public CommentDto createComment(CommentDto commentDto) {
         Comment comment = new Comment();
         comment.setContent(commentDto.getContent());
-        comment.setPost(post);
-        comment.setUser(user);
-
-        Comment savedComment  = commentRepository.save(comment);
-        return mapToDto(savedComment);
+        comment.setPost(postRepository.findById(commentDto.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found")));
+        comment.setUser(userRepository.findByUsername(commentDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found")));
+        return convertToDto(commentRepository.save(comment));
     }
 
-    @Transactional(readOnly = true)
-    public List<CommentDto> getCommentsByPostId(Long postId){
-        List<Comment> comments = commentRepository.findByPostId(postId);
-        return comments.stream().map(this::mapToDto).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public CommentDto updateComment(Long commentId, CommentDto commentDto){
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found with id: " + commentId));
-
+    public CommentDto updateComment(Long id, CommentDto commentDto) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
         comment.setContent(commentDto.getContent());
-        Comment updatedComment = commentRepository.save(comment);
-        return mapToDto(updatedComment);
+        return convertToDto(commentRepository.save(comment));
     }
 
-    public void deleteComment(Long commentId){
-        if (!commentRepository.existsById(commentId)) {
-            throw new IllegalArgumentException("Comment not found with id: " + commentId);
-        }
-        commentRepository.deleteById(commentId);
+    public void deleteComment(Long id) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        commentRepository.delete(comment);
     }
 
-    private CommentDto mapToDto(Comment comment) {
+    private CommentDto convertToDto(Comment comment) {
         return CommentDto.builder()
                 .id(comment.getId())
                 .content(comment.getContent())
-                .userId(comment.getUser().getId())
                 .postId(comment.getPost().getId())
+                .username(comment.getUser().getUsername())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .likeCount(comment.getLikeCount())
                 .build();
     }
 }

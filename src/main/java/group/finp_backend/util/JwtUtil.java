@@ -1,78 +1,61 @@
 package group.finp_backend.util;
 
-import group.finp_backend.dto.user.UserRegistrationDto;
-import io.jsonwebtoken.*;
-import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
-import lombok.extern.slf4j.Slf4j;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
-import java.time.ZonedDateTime;
 
-@Slf4j
 @Component
 public class JwtUtil {
 
-    private final Key key;
-    private final long accessTokenExpTime;
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    public JwtUtil(
-            @Value("${jwt.secret}") String secretKey,
-            @Value("${jwt.expiration_time}") long accessTokenExpTime
-    ){
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-        this.accessTokenExpTime = accessTokenExpTime;
+    private Key key;
+
+    @PostConstruct
+    public void init() {
+        // secretKey가 최소 512비트 길이인지 확인
+        if (secretKey.length() < 64) {
+            throw new IllegalArgumentException("The secret key must be at least 512 bits (64 characters) long");
+        }
+        key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createAccessToken(UserRegistrationDto dto){
-        return createToken(dto, accessTokenExpTime);
-    }
-
-    private String createToken(UserRegistrationDto dto, long expireTime){
-        Claims claims = Jwts.claims();
-        claims.put("email", dto.getEmail());
-        claims.put("password", dto.getPassword());
-        claims.put("username", dto.getUsername());
-
-        ZonedDateTime now = ZonedDateTime.now();
-        ZonedDateTime tokenValidity = now.plusSeconds(expireTime);
+    public String generateToken(String username) {
+        Date now = new Date();
+        Date expiryDate = new Date(now.getTime() + 3600000); // 1시간 후 만료
 
         return Jwts.builder()
-                .setClaims(claims)
-                .setIssuedAt(Date.from(now.toInstant()))
-                .setExpiration(Date.from(tokenValidity.toInstant()))
-                .signWith(key, SignatureAlgorithm.HS256)
+                .setSubject(username)
+                .setIssuedAt(now)
+                .setExpiration(expiryDate)
+                .signWith(key, SignatureAlgorithm.HS512)
                 .compact();
     }
 
-    public boolean validateToken(String token){
-        try{
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+    public String getUsernameFromJWT(String token) {
+        Claims claims = Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+
+        return claims.getSubject();
+    }
+
+    public boolean validateToken(String authToken) {
+        try {
+            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
             return true;
-        } catch(io.jsonwebtoken.security.SecurityException | MalformedJwtException e){
-            log.info("invalid JWT Token", e);
-        } catch(ExpiredJwtException e){
-            log.info("Expired JWT Token", e);
-        } catch(UnsupportedJwtException e){
-            log.info("Unsupported JWT Token", e);
-        } catch(IllegalArgumentException e){
-            log.info("JWT claims string is empty", e);
-        }
-
-        return false;
-    }
-
-    public Claims parseClaims(String accessToken){
-        try{
-            return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
-        } catch (ExpiredJwtException e){
-            return e.getClaims();
+        } catch (Exception ex) {
+            return false;
         }
     }
-
-
 }

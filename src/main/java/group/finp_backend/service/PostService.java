@@ -1,8 +1,8 @@
 package group.finp_backend.service;
 
-import group.finp_backend.dto.post.PostCreateDto;
-import group.finp_backend.dto.post.PostDto;
-import group.finp_backend.dto.post.PostUpdateDto;
+import group.finp_backend.dto.CommentDto;
+import group.finp_backend.dto.PostDto;
+import group.finp_backend.entity.Comment;
 import group.finp_backend.entity.Post;
 import group.finp_backend.entity.User;
 import group.finp_backend.repository.PostRepository;
@@ -12,81 +12,92 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class PostService {
-
     private final PostRepository postRepository;
     private final UserRepository userRepository;
 
-    @Transactional
-    public PostDto createPost(PostCreateDto createPostDto){
-        User user = userRepository.findById(createPostDto.getUserId())
-                .orElseThrow(() -> new IllegalArgumentException("User"));
-
-        Post post = new Post();
-        post.setTitle(createPostDto.getTitle());
-        post.setContent(createPostDto.getContent());
-        post.setUser(user);
-        post.setViewCount(0L);
-
-
-        post.setTags(new ArrayList<>(tags));
-
-        post = postRepository.save(post);
-
-        return mapToDto(post);
-
-    }
-
-    @Transactional(readOnly = true)
-    public List<PostDto> getAllPosts(){
-        return postRepository.findAll().stream().map(this::mapToDto).collect(Collectors.toList());
-    }
-
-    @Transactional
-    public PostDto updatePost(Long postId, PostUpdateDto updatePostDto){
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + postId));
-
-        post.setTitle(updatePostDto.getTitle());
-        post.setContent(updatePostDto.getContent());
-
-        post = postRepository.save(post);
-        return mapToDto(post);
-    }
-
-    @Transactional
-    public void deletePost(Long postId){
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("Post not found with id: " + postId));
-        postRepository.delete(post);
-    }
-
-    public List<PostDto> getTopPostsByViewCount(){
-        return postRepository.findTop10ByOrderByViewCountDesc(PageRequest.of(0,10))
+    public List<PostDto> getAllPosts(int page) {
+        return postRepository.findAll(PageRequest.of(page, 10))
                 .stream()
-                .map(this::mapToDto)
+                .map(this::convertToDto)
                 .collect(Collectors.toList());
     }
 
-
-
-
-
-
-    private PostDto mapToDto(Post post){
-       return PostDto.builder()
-               .id(post.getId())
-               .title(post.getTitle())
-               .content(post.getContent())
-               .userId(post.getUser().getId())
-               .viewCount(post.getViewCount())
-               .build();
+    public PostDto getPostById(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        return convertToDto(post);
     }
 
+    public PostDto createPost(PostDto postDto) {
+        Post post = new Post();
+        post.setTitle(postDto.getTitle());
+        post.setContent(postDto.getContent());
+        post.setReward(postDto.getReward());
+        post.setUser(userRepository.findByUsername(postDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found")));
+        Post savedPost = postRepository.save(post);
+        return convertToDto(savedPost);
+    }
+
+    public PostDto updatePost(Long id, PostDto postDto) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        post.setTitle(postDto.getTitle());
+        post.setContent(postDto.getContent());
+        post.setReward(postDto.getReward());
+        return convertToDto(postRepository.save(post));
+    }
+
+    public void deletePost(Long id) {
+        Post post = postRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        postRepository.delete(post);
+    }
+
+    public List<PostDto> getFavoriteTop10Posts() {
+        return postRepository.findTop10ByOrderByFavoritesCountDesc()
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    public List<PostDto> getRecent10Posts() {
+        return postRepository.findTop10ByOrderByCreatedAtDesc()
+                .stream()
+                .map(this::convertToDto)
+                .collect(Collectors.toList());
+    }
+
+    private PostDto convertToDto(Post post) {
+        return PostDto.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .reward(post.getReward())
+                .views(post.getViews())
+                .favoritesCount(post.getFavoritesCount())
+                .username(post.getUser().getUsername())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
+                .comments(post.getComments().stream().map(this::convertToDto).collect(Collectors.toList()))
+                .build();
+    }
+
+    private CommentDto convertToDto(Comment comment) {
+        return CommentDto.builder()
+                .id(comment.getId())
+                .content(comment.getContent())
+                .username(comment.getUser().getUsername())
+                .postId(comment.getPost().getId())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .build();
+    }
 }
