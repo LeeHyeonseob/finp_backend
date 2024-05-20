@@ -25,16 +25,18 @@ public class Post extends BaseTimeEntity{
 
     private String content;
 
-    private Long viewCount = 0L;
+
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
-    private User author ;
+    private User user;
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Comment> comments = new ArrayList<>();
 
     private Long favoriteCount;
+
+    private Long viewCount = 0L;
 
 
 }

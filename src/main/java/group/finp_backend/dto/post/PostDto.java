@@ -23,10 +23,10 @@ public class PostDto {
                 .id(post.getId())
                 .title(post.getTitle())
                 .content(post.getContent())
-                .author(UserDto.fromEntity(post.getAuthor()))
+                .author(UserDto.fromEntity(post.getUser()))
                 .favoriteCount(post.getFavoriteCount())
                 .viewCount(post.getViewCount())
-                .createdAt(post.getRegTime())
+                .createdAt(post.getCreatedAt())
                 .build();
 
     }

@@ -25,7 +25,7 @@ public class CommentDto {
                 .author(UserDto.fromEntity(comment.getUser()))
                 .likeCount(comment.getLikeCount())
                 .post(PostDto.fromEntity(comment.getPost()))
-                .createdAt(comment.getRegTime())
+                .createdAt(comment.getCreatedAt())
                 .build();
     }
 

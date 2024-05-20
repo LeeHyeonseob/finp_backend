@@ -1,58 +1,50 @@
 package group.finp_backend.service;
 
-import group.finp_backend.dto.user.UserDto;
+import group.finp_backend.JwtTokenProvider;
 import group.finp_backend.dto.user.UserLoginDto;
 import group.finp_backend.dto.user.UserRegistrationDto;
+import group.finp_backend.entity.Role;
 import group.finp_backend.entity.User;
 import group.finp_backend.repository.UserRepository;
-import group.finp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AuthService {
 
-    @Autowired
-    private AuthenticationManager authenticationManager;
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
-    private final PasswordEncoder encoder;
+
+    private final PasswordEncoder passwordEncoder;
+
+    private final JwtTokenProvider jwtTokenProvider;
 
 
 
-    //register 구현
-    public UserDto register(UserRegistrationDto dto){
-        User newUser = new User()
+    public User register(UserRegistrationDto dto) {
+        User newUser = new User();
+        newUser.setUsername(dto.getUsername());
+        newUser.setPassword(passwordEncoder.encode(dto.getPassword()));
+        newUser.setEmail(dto.getEmail());
+        newUser.setRole(Role.USER);
+        newUser.setCreatedAt(LocalDateTime.now());
+        newUser.setUpdatedAt(LocalDateTime.now());
+        return userRepository.save(newUser);
     }
-    @Transactional
-    public String login(UserLoginDto dto){
-        String email = dto.getEmail();
-        String password = dto.getPassword();
-        User user = userRepository.findUserByEmail(email);
-        if(user == null){
-            throw new UsernameNotFoundException("이메일이 존재하지 않습니다");
-        }
 
-        if(!encoder.matches(password, user.getPassword())){
-            throw new BadCredentialsException("비밀번호가 일치하지 않습니다");
-        }
+    public String login(UserLoginDto dto) {
+        User user = userRepository.findByUsername(dto.getUsername())
+                .filter(u -> passwordEncoder.matches(dto.getPassword(), u.getPassword()))
+                .orElseThrow(() -> new RuntimeException("Login failed"));
 
-        UserRegistrationDto regdto = UserRegistrationDto.builder()
-                .email(email)
-                .password(password)
-                .username(user.getUsername())
-                .build();
-        //유저 정보받아서
-        String accessToken = jwtUtil.createAccessToken(regdto);
-
-        return accessToken;
+        // Generate JWT token here
+        String token = jwtTokenProvider.createToken(user.getUsername(), user.getRole());
+        return token;
     }
+
 }

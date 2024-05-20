@@ -1,6 +1,7 @@
 package group.finp_backend.repository;
 
 import group.finp_backend.entity.Favorite;
+import group.finp_backend.entity.User;
 import group.finp_backend.service.FavoriteService;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -9,4 +10,6 @@ import java.util.Optional;
 
 public interface FavoriteRepository extends JpaRepository<Favorite, Long> {
     List<Favorite> findByUserId(Long userId);
+
+    Optional<Favorite> findByUserIdAndPostId(Long userId, Long postId);
 }

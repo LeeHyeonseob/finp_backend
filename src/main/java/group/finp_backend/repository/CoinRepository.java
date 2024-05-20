@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface CoinRepository extends JpaRepository<Coin, Long> {
     Optional<Coin> findByUser(User user);
+
+    Optional<Coin> findByUserId(Long userId);
 }
