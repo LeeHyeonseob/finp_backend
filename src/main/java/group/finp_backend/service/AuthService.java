@@ -9,6 +9,9 @@ import group.finp_backend.entity.User;
 import group.finp_backend.repository.UserRepository;
 import group.finp_backend.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +24,7 @@ import java.util.Optional;
 public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
     public UserDto register(UserDto userDto) {
@@ -43,14 +47,14 @@ public class AuthService {
     }
 
     public AuthResponseDto login(LoginRequestDto loginRequestDto) {
+        Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequestDto.getUsername(), loginRequestDto.getPassword()));
+
         User user = userRepository.findByUsername(loginRequestDto.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
-        if (!passwordEncoder.matches(loginRequestDto.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid password");
-        }
+        String token = jwtUtil.createToken(user.getUsername());
 
-        String token = jwtUtil.generateToken(user.getUsername());
         return new AuthResponseDto(token);
     }
 }

@@ -1,5 +1,6 @@
 package group.finp_backend.service;
 
+import group.finp_backend.JwtTokenProvider;
 import group.finp_backend.dto.CommentDto;
 import group.finp_backend.dto.PostDto;
 import group.finp_backend.entity.Comment;
@@ -21,6 +22,7 @@ import java.util.stream.Collectors;
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final JwtTokenProvider jwtTokenProvider;
 
     public List<PostDto> getAllPosts(int page) {
         return postRepository.findAll(PageRequest.of(page, 10))
@@ -35,13 +37,17 @@ public class PostService {
         return convertToDto(post);
     }
 
-    public PostDto createPost(PostDto postDto) {
+    public PostDto createPost(PostDto postDto, String token) {
+        String username = jwtTokenProvider.getUsernameFromJWT(token);
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
         Post post = new Post();
         post.setTitle(postDto.getTitle());
         post.setContent(postDto.getContent());
         post.setReward(postDto.getReward());
-        post.setUser(userRepository.findByUsername(postDto.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found")));
+        post.setUser(user);
+
         Post savedPost = postRepository.save(post);
         return convertToDto(savedPost);
     }

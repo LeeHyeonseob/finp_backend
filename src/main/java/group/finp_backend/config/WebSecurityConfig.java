@@ -5,6 +5,7 @@ import group.finp_backend.JwtTokenFilter;
 import group.finp_backend.JwtTokenProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -35,6 +36,13 @@ public class WebSecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(new AntPathRequestMatcher("/api/auth/**")).permitAll()
+//                        .requestMatchers(HttpMethod.POST, "/api/comments/**").authenticated()
+//                        .requestMatchers(HttpMethod.GET, "/api/comments/**").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/api/like-comments/**").authenticated()
+//                        .requestMatchers(HttpMethod.GET, "/api/like-comments/**").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/api/comments/**/reward").authenticated()
+//                        .requestMatchers(HttpMethod.GET, "/api/posts/**").authenticated()
+//                        .requestMatchers(HttpMethod.POST, "/api/posts/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtTokenFilter(jwtTokenProvider, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);

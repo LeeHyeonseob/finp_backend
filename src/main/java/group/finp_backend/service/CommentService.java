@@ -32,10 +32,14 @@ public class CommentService {
     public CommentDto createComment(CommentDto commentDto) {
         Comment comment = new Comment();
         comment.setContent(commentDto.getContent());
-        comment.setPost(postRepository.findById(commentDto.getPostId())
-                .orElseThrow(() -> new RuntimeException("Post not found")));
-        comment.setUser(userRepository.findByUsername(commentDto.getUsername())
-                .orElseThrow(() -> new RuntimeException("User not found")));
+        Post post = postRepository.findById(commentDto.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+        User user = userRepository.findByUsername(commentDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        comment.setPost(post);
+        comment.setUser(user);
+
         return convertToDto(commentRepository.save(comment));
     }
 

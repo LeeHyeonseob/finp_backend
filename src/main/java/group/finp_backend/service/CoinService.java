@@ -47,7 +47,7 @@ public class CoinService {
                 .build();
     }
 
-    public void rewardCoin(Long fromUserId, Long toUserId, int amount) {
+    public void rewardComment(Long fromUserId, Long toUserId, int amount) {
         User fromUser = userRepository.findById(fromUserId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
         User toUser = userRepository.findById(toUserId)

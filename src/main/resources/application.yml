@@ -17,4 +17,3 @@ spring:
 jwt:
   expiration: 3600000 # 1 hour in milliseconds
   secret: wX8g7yDsV6hJ3k9bX5z1R0pQ7nA2eF4mC3tQ1wY8lH6xT0uV9rJ8uX5dS3vF6zG7pL8oR2qN1mU4wX6yR7bH3cD8kL2sZ7rM3
-

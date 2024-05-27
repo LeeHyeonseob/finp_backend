@@ -1,23 +1,27 @@
 package group.finp_backend;
 
-import group.finp_backend.entity.Role;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.Base64;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
+
     @Value("${jwt.secret}")
     private String secretKey;
 
     @Value("${jwt.expiration}")
     private long expirationTime;
+
+    @PostConstruct
+    protected void init() {
+        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
+    }
 
     public String generateToken(String username) {
         Claims claims = Jwts.claims().setSubject(username);
@@ -37,7 +41,6 @@ public class JwtTokenProvider {
                 .setSigningKey(secretKey)
                 .parseClaimsJws(token)
                 .getBody();
-
         return claims.getSubject();
     }
 
@@ -45,7 +48,8 @@ public class JwtTokenProvider {
         try {
             Jwts.parser().setSigningKey(secretKey).parseClaimsJws(authToken);
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e) {
+            System.out.println("Invalid JWT signature");
             // log the error
         }
         return false;
@@ -58,15 +62,4 @@ public class JwtTokenProvider {
         }
         return null;
     }
-
-
-    public String getUsername(String token) {
-        return Jwts.parser()
-                .setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
-    }
-
-
 }

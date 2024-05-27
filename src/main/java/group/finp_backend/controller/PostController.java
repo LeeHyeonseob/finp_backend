@@ -3,6 +3,7 @@ package group.finp_backend.controller;
 import group.finp_backend.dto.PostDto;
 import group.finp_backend.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,8 +26,14 @@ public class PostController {
     }
 
     @PostMapping
-    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto) {
-        return ResponseEntity.ok(postService.createPost(postDto));
+    public ResponseEntity<PostDto> createPost(@RequestBody PostDto postDto, @RequestHeader("Authorization") String token) {
+        String jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
+        PostDto createdPost = postService.createPost(postDto, jwtToken);
+        if (createdPost != null) {
+            return ResponseEntity.ok(createdPost);
+        } else {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{id}")

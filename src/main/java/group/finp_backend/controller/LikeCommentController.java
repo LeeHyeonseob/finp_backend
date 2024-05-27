@@ -1,10 +1,13 @@
 package group.finp_backend.controller;
 
 import group.finp_backend.dto.LikeCommentDto;
+import group.finp_backend.dto.LikeCommentRequestDto;
 import group.finp_backend.service.LikeCommentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 
 @RestController
@@ -14,7 +17,8 @@ public class LikeCommentController {
     private final LikeCommentService likeCommentService;
 
     @PostMapping("/{commentId}")
-    public ResponseEntity<LikeCommentDto> likeComment(@PathVariable Long commentId, @RequestParam Long userId) {
+    public ResponseEntity<LikeCommentDto> likeComment(@PathVariable Long commentId, @RequestBody LikeCommentRequestDto request) {
+        Long userId = request.getUserId();
         return ResponseEntity.ok(likeCommentService.likeComment(commentId, userId));
     }
 
@@ -29,3 +33,5 @@ public class LikeCommentController {
         return ResponseEntity.ok(likeCommentService.countLikes(commentId));
     }
 }
+
+

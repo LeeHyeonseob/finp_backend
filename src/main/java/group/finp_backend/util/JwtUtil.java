@@ -9,7 +9,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.util.Base64;
 import java.util.Date;
+
 
 @Component
 public class JwtUtil {
@@ -17,44 +19,35 @@ public class JwtUtil {
     @Value("${jwt.secret}")
     private String secretKey;
 
-    private Key key;
+    @Value("${jwt.expiration}")
+    private long validityInMilliseconds;
 
     @PostConstruct
-    public void init() {
-        // secretKey가 최소 512비트 길이인지 확인
-        if (secretKey.length() < 64) {
-            throw new IllegalArgumentException("The secret key must be at least 512 bits (64 characters) long");
-        }
-        key = Keys.hmacShaKeyFor(secretKey.getBytes());
+    protected void init() {
+        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
     }
 
-    public String generateToken(String username) {
+    public String createToken(String username) {
+        Claims claims = Jwts.claims().setSubject(username);
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + 3600000); // 1시간 후 만료
-
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
-                .setSubject(username)
+                .setClaims(claims)
                 .setIssuedAt(now)
-                .setExpiration(expiryDate)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
                 .compact();
     }
 
-    public String getUsernameFromJWT(String token) {
-        Claims claims = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody();
-
-        return claims.getSubject();
+    public String getUsername(String token) {
+        return Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token).getBody().getSubject();
     }
 
-    public boolean validateToken(String authToken) {
+    public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(authToken);
+            Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return true;
-        } catch (Exception ex) {
+        } catch (Exception e) {
             return false;
         }
     }

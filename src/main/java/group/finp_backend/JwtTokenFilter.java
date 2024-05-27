@@ -17,28 +17,36 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 
+@Component
+@RequiredArgsConstructor
 public class JwtTokenFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider, CustomUserDetailsService customUserDetailsService) {
-        this.jwtTokenProvider = jwtTokenProvider;
-        this.customUserDetailsService = customUserDetailsService;
-    }
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = jwtTokenProvider.resolveToken(request);
-        if (token != null && jwtTokenProvider.validateToken(token)) {
-            String username = jwtTokenProvider.getUsername(token);
-            CustomUserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
+        System.out.println("Token: " + token); // 로그 추가
+        if (token != null) {
+            if (jwtTokenProvider.validateToken(token)) {
+                String username = jwtTokenProvider.getUsernameFromJWT(token);
+                System.out.println("Username from token: " + username); // 로그 추가
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(username);
 
-            if (userDetails != null) {
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-                authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+                if (userDetails != null) {
+                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+                    System.out.println("User authenticated: " + username); // 로그 추가
+                } else {
+                    System.out.println("UserDetails is null for username: " + username); // 로그 추가
+                }
+            } else {
+                System.out.println("Token validation failed"); // 로그 추가
             }
+        } else {
+            System.out.println("Token is null or invalid format"); // 로그 추가
         }
         filterChain.doFilter(request, response);
     }
