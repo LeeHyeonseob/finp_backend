@@ -19,6 +19,6 @@ public class CoinController {
 
     @PostMapping("/recharge")
     public ResponseEntity<CoinDto> recharge(@RequestBody CoinChargeRequestDto request) {
-        return ResponseEntity.ok(coinService.chargeCoin(request.getUserId(), request.getAmount()));
+        return ResponseEntity.ok(coinService.chargeCoin(request.getUserId(), request.getImpUid(), request.getAmount()));
     }
 }
