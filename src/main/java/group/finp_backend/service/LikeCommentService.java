@@ -19,10 +19,10 @@ public class LikeCommentService {
     private final CommentRepository commentRepository;
     private final UserRepository userRepository;
 
-    public LikeCommentDto likeComment(Long commentId, Long userId) {
-        if (commentId == null || userId == null) {
-            throw new IllegalArgumentException("Comment ID and User ID must not be null");
-        }
+    public LikeCommentDto likeComment(Long commentId, String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        Long userId = user.getId();
 
         if (likeCommentRepository.findByCommentIdAndUserId(commentId, userId).isPresent()) {
             throw new IllegalStateException("Already liked this comment");
@@ -30,8 +30,6 @@ public class LikeCommentService {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         LikeComment likeComment = new LikeComment();
         likeComment.setComment(comment);

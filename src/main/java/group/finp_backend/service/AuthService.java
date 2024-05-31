@@ -4,6 +4,7 @@ package group.finp_backend.service;
 import group.finp_backend.dto.AuthResponseDto;
 import group.finp_backend.dto.LoginRequestDto;
 import group.finp_backend.dto.UserDto;
+import group.finp_backend.entity.Coin;
 import group.finp_backend.entity.Role;
 import group.finp_backend.entity.User;
 import group.finp_backend.repository.UserRepository;
@@ -33,6 +34,7 @@ public class AuthService {
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRole(Role.USER);
+        user.setCoin(new Coin());
 
         userRepository.save(user);
 
@@ -43,6 +45,7 @@ public class AuthService {
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
+                .coin(user.getCoin())
                 .build();
     }
 

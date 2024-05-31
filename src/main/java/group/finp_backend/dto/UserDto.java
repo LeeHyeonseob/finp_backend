@@ -1,5 +1,6 @@
 package group.finp_backend.dto;
 
+import group.finp_backend.entity.Coin;
 import group.finp_backend.entity.Role;
 import lombok.Builder;
 import lombok.Getter;
@@ -14,6 +15,7 @@ public class UserDto {
     private String email;
     private String password;
     private Role role;
+    private Coin coin;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

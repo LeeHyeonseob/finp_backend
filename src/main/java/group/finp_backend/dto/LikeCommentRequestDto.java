@@ -6,5 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LikeCommentRequestDto {
-    private Long userId;
+    private String username;
 }

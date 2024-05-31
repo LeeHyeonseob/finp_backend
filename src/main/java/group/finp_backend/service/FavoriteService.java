@@ -20,7 +20,7 @@ public class FavoriteService {
     private final PostRepository postRepository;
 
     public FavoriteDto addFavorite(FavoriteDto favoriteDto) {
-        User user = userRepository.findById(favoriteDto.getUserId())
+        User user = userRepository.findByUsername(favoriteDto.getUsername())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Post post = postRepository.findById(favoriteDto.getPostId())
                 .orElseThrow(() -> new RuntimeException("Post not found"));
@@ -36,8 +36,23 @@ public class FavoriteService {
 
         return FavoriteDto.builder()
                 .id(favorite.getId())
-                .userId(favorite.getUser().getId())
+                .username(favorite.getUser().getUsername())
                 .postId(favorite.getPost().getId())
                 .build();
+    }
+
+    public void removeFavorite(FavoriteDto favoriteDto) {
+        User user = userRepository.findByUsername(favoriteDto.getUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        Post post = postRepository.findById(favoriteDto.getPostId())
+                .orElseThrow(() -> new RuntimeException("Post not found"));
+
+        Favorite favorite = favoriteRepository.findByUserIdAndPostId(user.getId(), post.getId())
+                .orElseThrow(() -> new RuntimeException("Favorite not found"));
+
+        favoriteRepository.delete(favorite);
+
+        post.setFavoritesCount(post.getFavoritesCount() - 1);
+        postRepository.save(post);
     }
 }

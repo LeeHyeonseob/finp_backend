@@ -10,5 +10,5 @@ import lombok.Getter;
 public class FavoriteDto {
     private Long id;
     private Long postId;
-    private Long userId;
+    private String username;
 }
