@@ -2,10 +2,10 @@ package group.finp_backend.controller;
 
 import group.finp_backend.dto.CommentDto;
 import group.finp_backend.dto.RewardRequest;
-import group.finp_backend.entity.Comment;
-import group.finp_backend.service.CoinService;
 import group.finp_backend.service.CommentService;
+import group.finp_backend.service.CoinService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,6 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/comments")
 @RequiredArgsConstructor
+@Slf4j
 public class CommentController {
     private final CommentService commentService;
     private final CoinService coinService;
@@ -25,6 +26,9 @@ public class CommentController {
 
     @PostMapping
     public ResponseEntity<CommentDto> createComment(@RequestBody CommentDto commentDto) {
+        log.info("댓글 생성 요청 받음 - 게시글 ID: {}", commentDto.getPostId());
+        log.info("댓글 생성 요청 받음 - 사용자 이름: {}", commentDto.getUsername());
+        log.info("댓글 생성 요청 받음 - 내용: {}", commentDto.getContent());
         return ResponseEntity.ok(commentService.createComment(commentDto));
     }
 
