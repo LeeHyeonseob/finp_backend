@@ -31,6 +31,20 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    public CommentDto getCommentById(Long id) {
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Comment not found"));
+        return CommentDto.builder()
+                .id(comment.getId())
+                .postId(comment.getPost().getId())
+                .username(comment.getUser().getUsername())
+                .content(comment.getContent())
+                .createdAt(comment.getCreatedAt())
+                .updatedAt(comment.getUpdatedAt())
+                .likeCount(comment.getLikeCount())
+                .build();
+    }
+
     public CommentDto createComment(CommentDto commentDto) {
         log.info("댓글 생성 서비스 호출됨 - 게시글 ID: {}", commentDto.getPostId());
         log.info("댓글 생성 서비스 호출됨 - 사용자 이름: {}", commentDto.getUsername());

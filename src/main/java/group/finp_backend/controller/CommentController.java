@@ -1,7 +1,6 @@
 package group.finp_backend.controller;
 
 import group.finp_backend.dto.CommentDto;
-import group.finp_backend.dto.RewardRequest;
 import group.finp_backend.service.CommentService;
 import group.finp_backend.service.CoinService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/comments")
@@ -44,8 +44,9 @@ public class CommentController {
     }
 
     @PostMapping("/{id}/reward")
-    public ResponseEntity<Void> rewardComment(@PathVariable Long id, @RequestBody RewardRequest rewardRequest) {
-        coinService.rewardComment(id, rewardRequest.getFromUserId(), rewardRequest.getAmount());
+    public ResponseEntity<Void> rewardComment(@PathVariable Long id, Principal principal) {
+        String fromUsername = principal.getName(); // 현재 로그인한 사용자의 이름을 가져옵니다.
+        coinService.rewardComment(fromUsername, id);
         return ResponseEntity.ok().build();
     }
 }

@@ -1,6 +1,7 @@
 package group.finp_backend.controller;
 
 import group.finp_backend.dto.UserDto;
+import group.finp_backend.dto.UserProfileDto;
 import group.finp_backend.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,12 @@ public class UserController {
     public ResponseEntity<UserDto> getUserById(@PathVariable Long id) {
         UserDto userDto = userService.getUserById(id);
         return ResponseEntity.ok().body(userDto);
+    }
+
+    @GetMapping("/username/{username}/details")
+    public ResponseEntity<UserProfileDto> getUserProfileByUsername(@PathVariable String username) {
+        UserProfileDto userProfileDto = userService.getUserProfileByUsername(username);
+        return ResponseEntity.ok().body(userProfileDto);
     }
 
 

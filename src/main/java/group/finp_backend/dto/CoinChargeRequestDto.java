@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @Builder
 public class CoinChargeRequestDto {
-    private Long userId;
+    private String username;
     private String impUid;
     private int amount;
 }

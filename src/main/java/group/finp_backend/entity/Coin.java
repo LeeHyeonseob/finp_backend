@@ -21,4 +21,9 @@ public class Coin extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    public Coin(User user) {
+        this.user = user;
+        this.amount = 0;
+    }
+
 }

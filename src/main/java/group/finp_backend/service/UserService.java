@@ -1,7 +1,16 @@
 package group.finp_backend.service;
 
+import group.finp_backend.dto.CoinDto;
+import group.finp_backend.dto.PostDto;
 import group.finp_backend.dto.UserDto;
+import group.finp_backend.dto.UserProfileDto;
+import group.finp_backend.entity.Coin;
+import group.finp_backend.entity.Favorite;
+import group.finp_backend.entity.Post;
 import group.finp_backend.entity.User;
+import group.finp_backend.repository.CoinRepository;
+import group.finp_backend.repository.FavoriteRepository;
+import group.finp_backend.repository.PostRepository;
 import group.finp_backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -17,6 +26,9 @@ import java.util.stream.Collectors;
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final PostRepository postRepository;
+    private final CoinRepository coinRepository;
+    private final FavoriteRepository favoriteRepository;
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
@@ -32,6 +44,61 @@ public class UserService {
                 .email(user.getEmail())
                 .build();
     }
+
+    public Long getUserIdByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getId();
+    }
+
+    public UserProfileDto getUserProfileByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<PostDto> userPosts = user.getPosts().stream()
+                .map(post -> PostDto.builder()
+                        .id(post.getId())
+                        .title(post.getTitle())
+                        .content(post.getContent())
+                        .username(post.getUser().getUsername())
+                        .views(post.getViews())
+                        .reward(post.getReward())
+                        .favoritesCount(post.getFavoritesCount())
+                        .createdAt(post.getCreatedAt())
+                        .updatedAt(post.getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        List<PostDto> favoritePosts = user.getFavorites().stream()
+                .map(favorite -> PostDto.builder()
+                        .id(favorite.getPost().getId())
+                        .title(favorite.getPost().getTitle())
+                        .content(favorite.getPost().getContent())
+                        .username(favorite.getPost().getUser().getUsername())
+                        .views(favorite.getPost().getViews())
+                        .reward(favorite.getPost().getReward())
+                        .favoritesCount(favorite.getPost().getFavoritesCount())
+                        .createdAt(favorite.getPost().getCreatedAt())
+                        .updatedAt(favorite.getPost().getUpdatedAt())
+                        .build())
+                .collect(Collectors.toList());
+
+        return UserProfileDto.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .createdAt(user.getCreatedAt())
+                .updatedAt(user.getUpdatedAt())
+                .coin(CoinDto.builder()
+                        .id(user.getCoin().getId())
+                        .userId(user.getCoin().getUser().getId())
+                        .balance(user.getCoin().getAmount())
+                        .build())
+                .posts(userPosts)
+                .favorites(favoritePosts)
+                .build();
+    }
+
 
     public void deleteUser(Long userId) {
         User user = userRepository.findById(userId)
@@ -55,6 +122,20 @@ public class UserService {
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
+                .build();
+    }
+
+    private PostDto convertToPostDto(Post post) {
+        return PostDto.builder()
+                .id(post.getId())
+                .title(post.getTitle())
+                .content(post.getContent())
+                .username(post.getUser().getUsername())
+                .views(post.getViews())
+                .reward(post.getReward())
+                .favoritesCount(post.getFavoritesCount())
+                .createdAt(post.getCreatedAt())
+                .updatedAt(post.getUpdatedAt())
                 .build();
     }
 

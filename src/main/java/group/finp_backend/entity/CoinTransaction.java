@@ -27,6 +27,6 @@ public class CoinTransaction extends BaseTimeEntity {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(nullable = true)
     private String impUid; // Iamport 결제 고유 식별자 추가
 }

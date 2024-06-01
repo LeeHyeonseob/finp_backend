@@ -10,6 +10,10 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<Post,Long> {
 
+
+
     List<Post> findTop10ByOrderByFavoritesCountDesc();
     List<Post> findTop10ByOrderByCreatedAtDesc();
+
+    List<Post> findByUserId(Long id);
 }

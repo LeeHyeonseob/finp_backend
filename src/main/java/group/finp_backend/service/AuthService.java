@@ -1,9 +1,7 @@
 package group.finp_backend.service;
 
 
-import group.finp_backend.dto.AuthResponseDto;
-import group.finp_backend.dto.LoginRequestDto;
-import group.finp_backend.dto.UserDto;
+import group.finp_backend.dto.*;
 import group.finp_backend.entity.Coin;
 import group.finp_backend.entity.Role;
 import group.finp_backend.entity.User;
@@ -28,24 +26,33 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JwtUtil jwtUtil;
 
-    public UserDto register(UserDto userDto) {
+    public UserCoinDto register(UserDto userDto) {
         User user = new User();
         user.setUsername(userDto.getUsername());
         user.setEmail(userDto.getEmail());
         user.setPassword(passwordEncoder.encode(userDto.getPassword()));
         user.setRole(Role.USER);
-        user.setCoin(new Coin());
+
+        // Create a new Coin entity and associate it with the user
+        Coin coin = new Coin(user);
+        user.setCoin(coin);
 
         userRepository.save(user);
 
-        return UserDto.builder()
+        CoinDto coinDto = CoinDto.builder()
+                .id(coin.getId())
+                .userId(coin.getUser().getId())
+                .balance(coin.getAmount())
+                .build();
+
+        return UserCoinDto.builder()
                 .id(user.getId())
                 .username(user.getUsername())
                 .email(user.getEmail())
                 .role(user.getRole())
                 .createdAt(user.getCreatedAt())
                 .updatedAt(user.getUpdatedAt())
-                .coin(user.getCoin())
+                .coin(coinDto)
                 .build();
     }
 

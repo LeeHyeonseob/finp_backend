@@ -2,6 +2,7 @@ package group.finp_backend.controller;
 
 import group.finp_backend.dto.AuthResponseDto;
 import group.finp_backend.dto.LoginRequestDto;
+import group.finp_backend.dto.UserCoinDto;
 import group.finp_backend.dto.UserDto;
 import group.finp_backend.service.AuthService;
 import group.finp_backend.util.JwtUtil;
@@ -24,7 +25,7 @@ public class AuthController {
     private final JwtUtil jwtUtil;
 
     @PostMapping("/register")
-    public ResponseEntity<UserDto> registerUser(@RequestBody UserDto userDto) {
+    public ResponseEntity<UserCoinDto> registerUser(@RequestBody UserDto userDto) {
         return ResponseEntity.ok(authService.register(userDto));
     }
 
