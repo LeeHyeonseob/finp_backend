@@ -15,6 +15,9 @@ public class IamportConfig {
 
     @Bean
     public IamportClient iamportClient() {
+        if (apiKey == null || apiKey.isEmpty() || apiSecret == null || apiSecret.isEmpty()) {
+            throw new IllegalStateException("Iamport API key와 secret을 제공해주세요.");
+        }
         return new IamportClient(apiKey, apiSecret);
     }
 }
